@@ -1,0 +1,17 @@
+<resources>
+
+    <style name="Theme.Paperroll123.Splash" parent="Theme.SplashScreen">
+        <!-- Corporate background -->
+        <item name="windowSplashScreenBackground">@color/paperroll_crema</item>
+
+        <!-- Centered logo (use the one that comes with the project) -->
+        <item name="windowSplashScreenAnimatedIcon">@drawable/splash_logo</item>
+
+        <!-- Animation duration -->
+        <item name="windowSplashScreenAnimationDuration">300</item>
+
+        <!-- Theme that will be applied after the splash -->
+        <item name="postSplashScreenTheme">@style/Theme.Paperroll123</item>
+    </style>
+
+</resources>
