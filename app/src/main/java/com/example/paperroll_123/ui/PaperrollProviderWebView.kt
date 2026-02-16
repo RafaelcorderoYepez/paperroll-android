@@ -28,15 +28,19 @@ fun PaperrollProviderWebView(
     val context = LocalContext.current
     var isLoading by remember { mutableStateOf(true) }
 
-    // ⭐ Timeout manual (30 segundos)
+    // ⭐ Nuevo: WebView listo para recibir errores
+    var webViewReady by remember { mutableStateOf(false) }
+
+    // ⭐ Timeout manual (60 segundos)
     val timeoutHandler = remember { Handler(Looper.getMainLooper()) }
     var timeoutTriggered by remember { mutableStateOf(false) }
 
     fun startTimeout(webView: WebView?) {
         timeoutTriggered = false
         timeoutHandler.removeCallbacksAndMessages(null)
+
         timeoutHandler.postDelayed({
-            if (isLoading && !timeoutTriggered) {
+            if (webViewReady && isLoading && !timeoutTriggered) {
                 timeoutTriggered = true
                 webView?.stopLoading()
                 webView?.loadUrl("about:blank")
@@ -52,19 +56,24 @@ fun PaperrollProviderWebView(
             factory = { ctx ->
                 WebView(ctx).apply {
 
+                    // ⭐ WebView creado correctamente
                     onWebViewCreated(this)
+                    webViewReady = true
 
                     settings.javaScriptEnabled = true
                     settings.domStorageEnabled = true
                     settings.useWideViewPort = true
                     settings.loadWithOverviewMode = true
+                    settings.mixedContentMode = WebSettings.MIXED_CONTENT_ALWAYS_ALLOW
+
 
                     webViewClient = object : WebViewClient() {
 
                         override fun onPageStarted(view: WebView?, url: String?, favicon: Bitmap?) {
                             isLoading = true
                             onLoadingStateChange(true)
-                            startTimeout(view)
+
+
                         }
 
                         override fun onPageFinished(view: WebView?, url: String?) {
@@ -78,6 +87,8 @@ fun PaperrollProviderWebView(
                             handler: SslErrorHandler?,
                             error: SslError?
                         ) {
+                            if (!webViewReady) return
+
                             view?.stopLoading()
                             view?.loadUrl("about:blank")
                             onError(ErrorType.SslError)
@@ -89,26 +100,27 @@ fun PaperrollProviderWebView(
                             request: WebResourceRequest?,
                             error: WebResourceError?
                         ) {
-                            if (request?.isForMainFrame == true) {
-                                view?.stopLoading()
-                                view?.loadUrl("about:blank")
+                            if (!webViewReady) return
+                            if (request?.isForMainFrame != true) return
 
-                                val desc = error?.description?.toString()?.lowercase().orEmpty()
+                            view?.stopLoading()
+                            view?.loadUrl("about:blank")
 
-                                val type = when {
-                                    "timeout" in desc -> ErrorType.Timeout
-                                    "host" in desc -> ErrorType.NoInternet
-                                    "internet" in desc -> ErrorType.NoInternet
-                                    "network" in desc -> ErrorType.NoInternet
-                                    "connection" in desc -> ErrorType.NoInternet
-                                    "reset" in desc -> ErrorType.NoInternet
-                                    "unreachable" in desc -> ErrorType.NoInternet
-                                    "ssl" in desc -> ErrorType.SslError
-                                    else -> ErrorType.General
-                                }
+                            val desc = error?.description?.toString()?.lowercase().orEmpty()
 
-                                onError(type)
+                            val type = when {
+                                "timeout" in desc -> ErrorType.Timeout
+                                "host" in desc -> ErrorType.NoInternet
+                                "internet" in desc -> ErrorType.NoInternet
+                                "network" in desc -> ErrorType.NoInternet
+                                "connection" in desc -> ErrorType.NoInternet
+                                "reset" in desc -> ErrorType.NoInternet
+                                "unreachable" in desc -> ErrorType.NoInternet
+                                "ssl" in desc -> ErrorType.SslError
+                                else -> ErrorType.General
                             }
+
+                            onError(type)
                         }
 
                         override fun onReceivedHttpError(
@@ -116,13 +128,15 @@ fun PaperrollProviderWebView(
                             request: WebResourceRequest?,
                             errorResponse: WebResourceResponse?
                         ) {
-                            if (request?.isForMainFrame == true) {
-                                view?.stopLoading()
-                                view?.loadUrl("about:blank")
-                                onError(ErrorType.General)
-                            }
+                            if (!webViewReady) return
+                            if (request?.isForMainFrame != true) return
+
+                            view?.stopLoading()
+                            view?.loadUrl("about:blank")
+                            onError(ErrorType.General)
                         }
 
+                        // ⭐ Versión correcta: solo interceptamos enlaces especiales
                         override fun shouldOverrideUrlLoading(
                             view: WebView?,
                             url: String?
@@ -130,8 +144,6 @@ fun PaperrollProviderWebView(
                             if (url == null) return false
 
                             return when {
-                                url.startsWith("https://gcfinc.com") -> false
-
                                 url.startsWith("link:") -> {
                                     context.startActivity(
                                         Intent(Intent.ACTION_VIEW, url.toUri())
@@ -139,12 +151,7 @@ fun PaperrollProviderWebView(
                                     true
                                 }
 
-                                else -> {
-                                    context.startActivity(
-                                        Intent(Intent.ACTION_VIEW, url.toUri())
-                                    )
-                                    true
-                                }
+                                else -> false // ⭐ Permitir que el WebView cargue TODO lo demás
                             }
                         }
 
@@ -159,7 +166,9 @@ fun PaperrollProviderWebView(
 
                     webChromeClient = object : WebChromeClient() {
                         override fun onProgressChanged(view: WebView?, newProgress: Int) {
-                            onProgressChange(newProgress)
+                            if (webViewReady) {
+                                onProgressChange(newProgress)
+                            }
                         }
                     }
 

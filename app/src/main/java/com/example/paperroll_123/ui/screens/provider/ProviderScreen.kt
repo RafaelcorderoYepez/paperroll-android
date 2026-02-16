@@ -11,7 +11,6 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.paperroll_123.domain.errors.ErrorType
 import com.example.paperroll_123.ui.PaperrollProviderWebView
 import com.example.paperroll_123.ui.components.BottomBar
@@ -25,9 +24,10 @@ import com.example.paperroll_123.ui.screens.main.MainViewModel
  */
 @Composable
 fun ProviderScreen(
-    trustedUrl: String
-) {
-    val viewModel: MainViewModel = viewModel()
+    trustedUrl: String,
+    viewModel: MainViewModel
+)
+ {
 
     var webViewRef by remember { mutableStateOf<WebView?>(null) }
     var webViewKey by remember { mutableStateOf(0) }

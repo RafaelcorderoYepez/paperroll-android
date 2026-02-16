@@ -9,6 +9,8 @@ import com.example.paperroll_123.ui.theme.Paperroll123Theme
 import androidx.navigation.compose.rememberNavController
 import com.example.paperroll_123.data.PreferencesManager
 import com.example.paperroll_123.ui.navigation.AppNavHost
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.example.paperroll_123.ui.screens.main.MainViewModel
 
 class MainActivity : ComponentActivity() {
 
@@ -26,10 +28,13 @@ class MainActivity : ComponentActivity() {
                 dynamicColor = false
             ) {
                 val navController = rememberNavController()
+                val mainViewModel: MainViewModel = viewModel()
+
                 AppNavHost(
                     navController = navController,
                     preferences = preferences,
-                    trustedUrl = trustedUrl
+                    trustedUrl = trustedUrl,
+                    mainViewModel = mainViewModel
                 )
             }
         }

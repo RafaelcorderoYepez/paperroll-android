@@ -1,26 +1,33 @@
 package com.example.paperroll_123.ui.navigation
 
 import androidx.compose.runtime.*
-import androidx.compose.runtime.collectAsState
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import com.example.paperroll_123.data.PreferencesManager
 import com.example.paperroll_123.ui.screens.disclaimer.DisclaimerScreen
 import com.example.paperroll_123.ui.screens.provider.ProviderScreen
+import com.example.paperroll_123.ui.screens.main.MainViewModel
 import kotlinx.coroutines.launch
 
-/**
- * Main navigation graph for the application.
- */
 @Composable
 fun AppNavHost(
     navController: NavHostController,
     preferences: PreferencesManager,
-    trustedUrl: String
+    trustedUrl: String,
+    mainViewModel: MainViewModel
 ) {
     val scope = rememberCoroutineScope()
-    val accepted by preferences.disclaimerAccepted.collectAsState(initial = false)
+
+    // null = todavía cargando DataStore
+    val acceptedState = preferences.disclaimerAccepted.collectAsState(initial = null)
+
+    // Mientras DataStore carga, no mostramos nada (o podrías mostrar tu Splash)
+    if (acceptedState.value == null) {
+        return
+    }
+
+    val accepted = acceptedState.value == true
 
     NavHost(
         navController = navController,
@@ -41,7 +48,10 @@ fun AppNavHost(
         }
 
         composable(AppRoutes.PROVIDER) {
-            ProviderScreen(trustedUrl = trustedUrl)
+            ProviderScreen(
+                trustedUrl = trustedUrl,
+                viewModel = mainViewModel
+            )
         }
     }
 }

@@ -16,11 +16,13 @@ fun PaperrollTopBar() {
     TopAppBar(
         title = {
             Box(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(end = 68.dp), // espacio para compensar el icono
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = "Shop app",
+                    text = "Paperroll 123 Store",
                     style = MaterialTheme.typography.titleLarge,
                     color = MaterialTheme.colorScheme.onPrimary
                 )
@@ -31,14 +33,17 @@ fun PaperrollTopBar() {
                 painter = painterResource(id = R.drawable.paperroll_logo_white),
                 contentDescription = "Logo PaperRoll",
                 modifier = Modifier
-                    .height(48.dp)
+                    .width(96.dp)
+                    .height(80.dp)
                     .padding(start = 12.dp)
+
             )
         },
         colors = TopAppBarDefaults.topAppBarColors(
             containerColor = MaterialTheme.colorScheme.primary,
             titleContentColor = MaterialTheme.colorScheme.onPrimary
         ),
-        modifier = Modifier.height(70.dp)
+        modifier = Modifier.height(100.dp)
     )
 }
+
