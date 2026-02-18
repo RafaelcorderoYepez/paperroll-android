@@ -3,14 +3,19 @@ package com.example.paperroll_123
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
-import com.example.paperroll_123.ui.theme.Paperroll123Theme
 import androidx.navigation.compose.rememberNavController
+import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.paperroll_123.data.PreferencesManager
 import com.example.paperroll_123.ui.navigation.AppNavHost
-import androidx.lifecycle.viewmodel.compose.viewModel
 import com.example.paperroll_123.ui.screens.main.MainViewModel
+import com.example.paperroll_123.ui.theme.Paperroll123Theme
+import androidx.compose.runtime.*
 
 class MainActivity : ComponentActivity() {
 
@@ -18,6 +23,8 @@ class MainActivity : ComponentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
+
+        // Mantiene el splash hasta que Compose esté listo
         installSplashScreen()
 
         val preferences = PreferencesManager(this)
@@ -27,15 +34,32 @@ class MainActivity : ComponentActivity() {
                 darkTheme = isSystemInDarkTheme(),
                 dynamicColor = false
             ) {
-                val navController = rememberNavController()
-                val mainViewModel: MainViewModel = viewModel()
 
-                AppNavHost(
-                    navController = navController,
-                    preferences = preferences,
-                    trustedUrl = trustedUrl,
-                    mainViewModel = mainViewModel
-                )
+                // Controla la animación de entrada
+                var visible by remember { mutableStateOf(false) }
+
+                LaunchedEffect(Unit) {
+                    visible = true
+                }
+
+                AnimatedVisibility(
+                    visible = visible,
+                    enter = fadeIn(animationSpec = tween(500)) +
+                            scaleIn(
+                                initialScale = 0.92f, // Zoom-in suave
+                                animationSpec = tween(600)
+                            )
+                ) {
+                    val navController = rememberNavController()
+                    val mainViewModel: MainViewModel = viewModel()
+
+                    AppNavHost(
+                        navController = navController,
+                        preferences = preferences,
+                        trustedUrl = trustedUrl,
+                        mainViewModel = mainViewModel
+                    )
+                }
             }
         }
     }

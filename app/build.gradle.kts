@@ -18,6 +18,22 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    // ⭐ NUEVO: Flavors para Standard y Clover
+    flavorDimensions += "platform"
+
+    productFlavors {
+        create("standard") {
+            dimension = "platform"
+            applicationId = "com.example.paperroll_123"
+            versionNameSuffix = "-standard"
+        }
+        create("clover") {
+            dimension = "platform"
+            applicationId = "com.example.paperroll_123.clover"
+            versionNameSuffix = "-clover"
+        }
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -51,7 +67,6 @@ dependencies {
 
     // viewmodel + compose
     implementation("androidx.lifecycle:lifecycle-viewmodel-compose:2.8.0")
-
 
     // Compose BOM
     implementation(platform(libs.androidx.compose.bom))

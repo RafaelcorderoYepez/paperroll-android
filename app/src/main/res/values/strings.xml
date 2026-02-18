@@ -1,3 +1,4 @@
 <resources>
-    <string name="app_name">paperroll-123</string>
+    <string name="base_url">https://paperroll-123.com/app</string>
+    <string name="app_name">Paperroll-123</string>
 </resources>
